@@ -1,3 +1,9 @@
+docker-build:
+	docker build -t project-devops-deploy .
+
+docker-run-dev:
+	docker run --rm -p 8080:8080 project-devops-deploy:latest
+
 test:
 	./gradlew test
 
