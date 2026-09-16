@@ -136,12 +136,28 @@ See [Makefile](./Makefile)
 
 ### Running in Docker
 
-Pass JVM flags via `JAVA_OPTS`:
+First, build the minimal production-ready Docker image using the multi-stage Dockerfile:
+
+```bash
+docker build -t project-devops-deploy .
+```
+
+To run the application locally in the default development profile (with an in-memory H2 database), execute:
+
+```bash
+docker run --rm -p 8080:8080 project-devops-deploy:latest
+```
+
+Once started, the application interface and API will be available at [http://localhost:8080](http://localhost:8080).
+
+#### Advanced Configuration
+
+You can pass JVM flags and Spring profiles via `JAVA_OPTS` or environment variables:
 
 ```bash
 docker run --rm -p 8080:8080 \
   -e JAVA_OPTS="-Xms256m -Xmx512m -Dspring.profiles.active=prod" \
-  ...
+  project-devops-deploy:latest
 ```
 
 Useful JVM options:
@@ -150,6 +166,7 @@ Useful JVM options:
 - `-XX:+UseContainerSupport` / `-XX:ActiveProcessorCount` (these respect cgroup limits by default).
 - `-Dspring.profiles.active=prod` — switch the profile without recompiling.
 - `-Dlogging.level.root=INFO` or Spring environment variables (`SPRING_DATASOURCE_URL`, `STORAGE_S3_BUCKET`, etc.) — configure external services.
+
 
 ## Monitoring / management ports
 
