@@ -1,0 +1,7 @@
+all:
+  children:
+    webservers:
+      hosts:
+        server1:
+          ansible_host: 51.250.13.89
+          ansible_user: deploy

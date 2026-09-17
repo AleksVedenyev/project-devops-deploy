@@ -1,0 +1,33 @@
+- hosts: all
+  become: true
+  roles:
+    - role: geerlingguy.docker
+  tasks:
+    - name: Add user "deploy" to group "Docker"
+      ansible.builtin.user:
+        name: deploy
+        groups: docker
+        append: true
+
+    - name: Deny everything and enable UFW
+      community.general.ufw:
+        policy: deny
+
+    - name: UFW allow SSH
+      community.general.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: UFW allow HTTP
+      community.general.ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: UFW allow HTTPS and enable
+      community.general.ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
+        state: enabled
