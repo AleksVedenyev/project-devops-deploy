@@ -1,3 +1,5 @@
+[![CI](https://github.com/AleksVedenyev/project-devops-deploy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AleksVedenyev/project-devops-deploy/actions/workflows/ci.yml)
+
 # Project DevOps Deploy
 
 Bulletin board service.
