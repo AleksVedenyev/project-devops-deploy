@@ -18,6 +18,31 @@ API documentation is available via Swagger UI at `http://localhost:8080/swagger-
 
 Keep this structure in mind when running commands—backend tooling (`gradlew`, `make run`, tests) run from the root, frontend tooling (`npm`, `vite`) runs from `frontend/`.
 
+## Deployment
+
+The application is deployed to a production server and available at:
+
+- **Domain:** [aleks-devops.ru](http://aleks-devops.ru)
+- **API:** `http://aleks-devops.ru/api/bulletins`
+- **Swagger UI:** `http://aleks-devops.ru/swagger-ui/index.html`
+
+### Deploying
+
+
+Deployment is done via Ansible and can be triggered with a single command:
+
+```
+make deploy
+```
+
+By default this deploys the `latest` image tag. To deploy (or roll back to) a specific version, pass the immutable SHA-based tag published by CI:
+
+```
+make deploy IMAGE_TAG=<git-commit-sha>
+```
+
+Each CI run on `main` publishes the image under two tags: `latest` and the commit SHA (`aleksved/project-devops-deploy:<sha>`). The SHA tag is never overwritten, so it can be used to redeploy an exact previous build if a rollback is needed.
+
 ## Environment variables
 
 Key variables are read directly by Spring Boot (see `src/main/resources/application.yml` and `application-prod.yml` for defaults):
