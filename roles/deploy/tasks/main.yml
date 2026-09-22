@@ -1,0 +1,17 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for deploy
+- name: Pull an image
+  community.docker.docker_image_pull:
+    name: "{{ image_name }}"
+
+- name: Start a container
+  community.docker.docker_container:
+      name: project-devops-deploy
+      image: "{{ image_name }}"
+      state: started
+      restart_policy: always
+      ports:
+        - "8080:8080"
+      env:
+        SPRING_PROFILES_ACTIVE: "prod"
