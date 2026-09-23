@@ -7,7 +7,7 @@ docker-run-dev:
 	docker run --rm -p 8080:8080 project-devops-deploy:latest
 
 deploy:
-	ansible-playbook deploy.yml -i inventory.yml -e "image_tag=$(IMAGE_TAG)"
+	ansible-playbook --vault-password-file ./vault-password-file deploy.yml -i inventory.yml -e "image_tag=$(IMAGE_TAG)"
 
 test:
 	./gradlew test
