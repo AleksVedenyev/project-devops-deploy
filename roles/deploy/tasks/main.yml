@@ -15,7 +15,7 @@
         - "8080:8080"
       env:
         SPRING_PROFILES_ACTIVE: "prod"
-        SPRING_DATASOURCE_URL: "jdbc:postgresql://rc1a-knp27jjb37mp8r82.mdb.yandexcloud.net:6432/db1?targetServerType=master&sslmode=require"
+        SPRING_DATASOURCE_URL: "jdbc:postgresql://rc1a-knp27jjb37mp8r82.mdb.yandexcloud.net:6432/bulletins?targetServerType=master&sslmode=require"
         SPRING_DATASOURCE_USERNAME: "{{ SPRING_DATASOURCE_USERNAME }}"
         SPRING_DATASOURCE_PASSWORD: "{{ SPRING_DATASOURCE_PASSWORD }}"
         STORAGE_S3_ACCESSKEY: "YCAJEgsS3AeHlDIbQd_pcoL1O"
