@@ -1,43 +1,44 @@
-[![CI](https://github.com/AleksVedenyev/project-devops-deploy/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AleksVedenyev/project-devops-deploy/actions/workflows/ci.yml)
-
 # Project DevOps Deploy
 
 Bulletin board service.
 
-> **Fork policy**: this upstream repository is read-only. We do not review or merge pull requests and we do not accept infrastructure changes (Dockerfiles, Ansible roles, CI/CD workflows, etc.). To experiment or extend the project, fork it and work inside your own repository.
+## Fork policy
 
-The default `dev` profile uses an in-memory H2 database and seeds 10 sample bulletins through `DataInitializer`, so the API works immediately after startup.
+This upstream repository is read-only. We do not review or merge pull requests and we do not accept infrastructure changes (Dockerfiles, Ansible roles, CI/CD workflows, etc.). To experiment or extend the project, fork it and work inside your own repository.
 
-API documentation is available via Swagger UI at `http://localhost:8080/swagger-ui/index.html`.
+## Project overview
 
-## Project layout
+This is a bulletin board application with:
+* **Spring Boot** backend
+* **React Admin + Vite** frontend
+* **Image uploads** stored in the local filesystem in dev and in S3-compatible storage in prod
 
-- Backend (Spring Boot) lives in the repository root.
-- Frontend (React Admin + Vite) is located in `frontend/`.
-- Shared static assets for the backend are served from `src/main/resources/static` (populated by the frontend build when needed).
+The default dev profile uses an in-memory H2 database and seeds 10 sample bulletins through `DataInitializer`, so the API works immediately after startup.
 
-Keep this structure in mind when running commands—backend tooling (`gradlew`, `make run`, tests) run from the root, frontend tooling (`npm`, `vite`) runs from `frontend/`.
+API documentation is available via Swagger UI:
+* **Local:** http://localhost:8080/swagger-ui/index.html
+* **Production:** http://aleks-devops.ru
 
 ## Deployment
 
 The application is deployed to a production server and available at:
-
-- **Domain:** [aleks-devops.ru](http://aleks-devops.ru)
-- **API:** `http://aleks-devops.ru/api/bulletins`
-- **Swagger UI:** `http://aleks-devops.ru/swagger-ui/index.html`
+* **Domain:** http://aleks-devops.ru
+* **API:** http://aleks-devops.ru/api/bulletins
+* **Swagger UI:** http://aleks-devops.ru/swagger-ui/index.html
 
 ### Deploying
 
-
 Deployment is done via Ansible and can be triggered with a single command:
 
-```
+```bash
 make deploy
 ```
 
-By default this deploys the `latest` image tag. To deploy (or roll back to) a specific version, pass the immutable SHA-based tag published by CI:
+By default, this deploys the `latest` image tag.
 
-```
+To deploy or roll back to a specific version, pass the immutable SHA-based tag published by CI:
+
+```bash
 make deploy IMAGE_TAG=<git-commit-sha>
 ```
 
@@ -47,137 +48,118 @@ Each CI run on `main` publishes the image under two tags: `latest` and the commi
 
 Key variables are read directly by Spring Boot (see `src/main/resources/application.yml` and `application-prod.yml` for defaults):
 
-| Variable                     | Description                                                   | Default                                      |
-| ---------------------------- | ------------------------------------------------------------- | -------------------------------------------- |
-| `SPRING_PROFILES_ACTIVE`     | Active Spring profile (`dev`, `prod`, etc.)                   | `dev`                                        |
-| `SPRING_DATASOURCE_URL`      | JDBC URL for PostgreSQL in `prod`                             | `jdbc:postgresql://localhost:5432/bulletins` |
-| `SPRING_DATASOURCE_USERNAME` | DB username                                                   | `postgres`                                   |
-| `SPRING_DATASOURCE_PASSWORD` | DB password                                                   | `postgres`                                   |
-| `STORAGE_S3_BUCKET`          | Bucket name for bulletin images                               | empty                                        |
-| `STORAGE_S3_REGION`          | Region for the S3-compatible storage                          | empty                                        |
-| `STORAGE_S3_ENDPOINT`        | Optional custom endpoint                                      | empty                                        |
-| `STORAGE_S3_ACCESSKEY`       | Access key ID                                                 | empty                                        |
-| `STORAGE_S3_SECRETKEY`       | Secret key                                                    | empty                                        |
-| `STORAGE_S3_CDNURL`          | Optional public CDN prefix                                    | empty                                        |
-| `MANAGEMENT_SERVER_PORT`     | Port for Spring Actuator endpoints (health, metrics, etc.)    | `9090`                                       |
-| `JAVA_OPTS`                  | Extra JVM parameters (heap, `-Dspring.profiles.active`, etc.) | empty                                        |
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `SPRING_PROFILES_ACTIVE` | Active Spring profile (dev, prod, etc.) | `dev` |
+| `SPRING_DATASOURCE_URL` | JDBC URL for PostgreSQL in prod | `jdbc:postgresql://localhost:5432/bulletins` |
+| `SPRING_DATASOURCE_USERNAME` | DB username | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD` | DB password | `postgres` |
+| `STORAGE_S3_BUCKET` | Bucket name for bulletin images | *empty* |
+| `STORAGE_S3_REGION` | Region for the S3-compatible storage | *empty* |
+| `STORAGE_S3_ENDPOINT` | Optional custom endpoint | *empty* |
+| `STORAGE_S3_ACCESSKEY` | Access key ID | *empty* |
+| `STORAGE_S3_SECRETKEY` | Secret key | *empty* |
+| `STORAGE_S3_CDNURL` | Optional public CDN prefix | *empty* |
+| `MANAGEMENT_SERVER_PORT` | Port for Spring Actuator endpoints | `9090` |
+| `JAVA_OPTS` | Extra JVM parameters | *empty* |
 
-All other variables supported by Spring Boot can be overridden the same way; check the application configuration files if you need to confirm a property name.
+All other variables supported by Spring Boot can be overridden the same way.
 
 ## Requirements
 
-- JDK 21+.
-- Gradle 9.2.1.
-- PostgreSQL only if you run the `prod` profile with an external database.
-- Make.
-- NodeJS 20+
+* JDK 21+
+* Gradle 9.2.1
+* PostgreSQL (only if you run the prod profile with an external database)
+* Make
+* NodeJS 20+
 
-## Running
+## Running locally
 
-### Backend (local dev profile)
+### Backend (dev profile)
 
-1. Install prerequisites from the **Requirements** section.
-2. From the repository root start the backend:
+From the repository root:
 
-    ```bash
-    make run
-    ```
+```bash
+make run
+```
 
-3. Explore the API:
-   - `GET http://localhost:8080/api/bulletins`
-   - `GET http://localhost:8080/api/bulletins?page=1&perPage=9&sort=createdAt&order=DESC&state=PUBLISHED&search=laptop`
-   - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+Useful endpoints:
+* **GET** http://localhost:8080/api/bulletins
+* **GET** http://localhost:8080/api/bulletins?page=1&perPage=9&sort=createdAt&order=DESC&state=PUBLISHED&search=laptop
+* **Swagger UI:** http://localhost:8080/swagger-ui/index.html
 
 `/api/bulletins` accepts pagination (`page`, `perPage`), sorting (`sort`, `order`) and filters (`state`, `search`). Filters are processed via JPA Specifications so the same contract is available to the React Admin frontend.
 
-### Frontend (development build)
+### Frontend (dev build)
 
-1. Open a second terminal and move into the frontend directory:
+In a second terminal:
 
-    ```bash
-    cd frontend
-    make install   # npm install
-    make start     # Vite dev server on http://localhost:5173
-    ```
+```bash
+cd frontend
+make install
+make start
+```
 
-2. The dev server proxies `/api` requests to `http://localhost:8080`, so keep the backend running.
+The Vite dev server proxies `/api` requests to http://localhost:8080, so keep the backend running.
 
 ### Production profile on a single host
 
-1. Export the environment variables from the table above (DB access, S3 storage, `JAVA_OPTS`, etc.). The defaults in `application-prod.yml` show the exact property names if you need to double-check.
-2. Build and launch the backend:
+Export the environment variables from the table above (DB access, S3 storage, `JAVA_OPTS`, etc.). The defaults in `application-prod.yml` show the exact property names if you need to double-check.
 
-    ```bash
-    make build
-    java -jar build/libs/project-devops-deploy-0.0.1-SNAPSHOT.jar
-    ```
+Build and launch the backend:
 
-3. Serve the frontend either from the same JVM (see **Build and serve from the Java app**) or deploy it separately (any static hosting/CDN works once `frontend/dist` is uploaded).
+```bash
+make build
+java -jar build/libs/project-devops-deploy-0.0.1-SNAPSHOT.jar
+```
+
+The frontend can be served either from the same JVM or separately via static hosting/CDN once `frontend/dist` is uploaded.
 
 `JAVA_OPTS` can be used to control heap size, GC, or add any `-D` system properties without editing the manifest.
 
-### Useful commands
+#### Build and serve from the Java app
 
-See [Makefile](./Makefile)
+Build the production bundle:
 
-## Frontend
+```bash
+cd frontend
+make install
+make build
+```
 
-### Development
+Copy the compiled assets into Spring Boot’s static resources:
 
-1. Install Node.js 24 LTS (or newer) and npm.
-2. Install dependencies and start the Vite dev server:
+```bash
+rm -rf src/main/resources/static
+mkdir -p src/main/resources/static
+cp -R frontend/dist/* src/main/resources/static/
+```
 
-    ```bash
-    cd frontend
-    make install
-    make start
-    ```
+Restart the backend:
 
-3. The dev server proxies `/api` requests to `http://localhost:8080`, so keep the backend running via `make run` (or `./gradlew bootRun`) in another terminal.
+```bash
+make run
+```
 
-### Image upload flow
+Then open http://localhost:8080/ — the React app will be served directly by the Java application.
 
-1. Upload files via `POST /api/files/upload` (multipart form field named `file`).
-2. The response contains `key` and a temporary `url`. Persist the `key` in the `imageKey` field when creating or updating bulletins; the backend stores only that identifier.
-3. When you need a fresh link, call `GET /api/files/view?key=...` to receive a new URL (the backend issues presigned links on demand).
+## Running in Docker
 
-### Build and serve from the Java app
-
-1. Build the production bundle:
-
-    ```bash
-    cd frontend
-    make install      # run once
-    make build    # outputs to frontend/dist
-    ```
-
-2. Copy the compiled assets into Spring Boot’s static resources (served from `src/main/resources/static`):
-
-    ```bash
-    rm -rf src/main/resources/static
-    mkdir -p src/main/resources/static
-    cp -R frontend/dist/* src/main/resources/static/
-    ```
-
-3. Restart the backend (`make run`) and open `http://localhost:8080/` — the React app will now be served directly by the Java application.
-
-### Running in Docker
-
-First, build the minimal production-ready Docker image using the multi-stage Dockerfile:
+Build the minimal production-ready Docker image using the multi-stage Dockerfile:
 
 ```bash
 docker build -t project-devops-deploy .
 ```
 
-To run the application locally in the default development profile (with an in-memory H2 database), execute:
+Run the application locally with the default development profile:
 
 ```bash
 docker run --rm -p 8080:8080 project-devops-deploy:latest
 ```
 
-Once started, the application interface and API will be available at [http://localhost:8080](http://localhost:8080).
+The application interface and API will be available at http://localhost:8080.
 
-#### Advanced Configuration
+### Advanced configuration
 
 You can pass JVM flags and Spring profiles via `JAVA_OPTS` or environment variables:
 
@@ -188,56 +170,88 @@ docker run --rm -p 8080:8080 \
 ```
 
 Useful JVM options:
+* `-Xms`/`-Xmx` — set memory limits inside the container
+* `-XX:+UseContainerSupport` / `-XX:ActiveProcessorCount` — respect cgroup limits
+* `-Dspring.profiles.active=prod` — switch the profile without recompiling
+* `-Dlogging.level.root=INFO` or Spring environment variables (`SPRING_DATASOURCE_URL`, `STORAGE_S3_BUCKET`, etc.) — configure external services
 
-- `-Xms/-Xmx` — set memory limits inside the container.
-- `-XX:+UseContainerSupport` / `-XX:ActiveProcessorCount` (these respect cgroup limits by default).
-- `-Dspring.profiles.active=prod` — switch the profile without recompiling.
-- `-Dlogging.level.root=INFO` or Spring environment variables (`SPRING_DATASOURCE_URL`, `STORAGE_S3_BUCKET`, etc.) — configure external services.
+### Monitoring / management ports
 
+Application traffic still uses port 8080 by default. Actuator endpoints (health, metrics, Prometheus scrape, logfile) listen on `MANAGEMENT_SERVER_PORT` (defaults to 9090 for every profile).
 
-## Monitoring / management ports
+If your deployment does not include Prometheus/Grafana yet, you can ignore the management port entirely; the application starts normally even if nothing scrapes `/actuator`.
 
-- Application traffic still uses port `8080` by default. Actuator endpoints (health, metrics, Prometheus scrape, logfile) listen on `MANAGEMENT_SERVER_PORT` (defaults to `9090` for every profile). Override it via env vars when you need a different port.
-- If your deployment does **not** include Prometheus/Grafana yet, you can ignore the management port entirely; the application starts normally even if nothing scrapes `/actuator`. Simply avoid publishing the management port in Docker/Kubernetes until you need it.
-- When monitoring is enabled, expose both ports, e.g. `docker run -p 8080:8080 -p 9090:9090 ...` and point Prometheus to `http://<host>:9090/actuator/prometheus`.
-- Health probes are available at `/actuator/health/liveness` and `/actuator/health/readiness`; Grafana/Loki integrations should use the same port/env variable.
+When monitoring is enabled, expose both ports, for example:
 
-## Actuator endpoints (local check)
+```bash
+docker run -p 8080:8080 -p 9090:9090 ...
+```
 
-With the app running locally (`make run`), the management port defaults to `http://localhost:9090`. Useful URLs:
+Health probes are available at:
+* `/actuator/health/liveness`
+* `/actuator/health/readiness`
 
-- `http://localhost:9090/actuator` — index of exposed endpoints.
-- `http://localhost:9090/actuator/health`, `/actuator/health/liveness`, `/actuator/health/readiness` — readiness/liveness probes.
-- `http://localhost:9090/actuator/metrics` and `http://localhost:9090/actuator/metrics/http.server.requests` — raw Micrometer metrics.
-- `http://localhost:9090/actuator/prometheus` — Prometheus scrape output (open in browser or `curl` to confirm it renders).
-- `http://localhost:9090/actuator/logfile` — current application log (same JSON that goes to stdout).
+### Actuator endpoints (local check)
 
-Override the host/port with `MANAGEMENT_SERVER_PORT` if you changed it; no Prometheus or Grafana instance is needed just to inspect these endpoints.
+With the app running locally (`make run`), the management port defaults to http://localhost:9090.
+
+Useful URLs:
+* http://localhost:9090/actuator
+* http://localhost:9090/actuator/health
+* http://localhost:9090/actuator/health/liveness
+* http://localhost:9090/actuator/health/readiness
+* http://localhost:9090/actuator/metrics
+* http://localhost:9090/actuator/metrics/http.server.requests
+* http://localhost:9090/actuator/prometheus
+* http://localhost:9090/actuator/logfile
+
+Override the host/port with `MANAGEMENT_SERVER_PORT` if you changed it.
 
 ## Logging
 
-- The backend ships with `src/main/resources/logback-spring.xml`, which writes structured JSON events to `stdout`. Every record contains `timestamp`, `app`, `environment`, `instance`, `logger`, `thread`, message arguments, MDC, and stack traces so Promtail/Loki (or any log shipper) can parse them without extra processing.
-- No extra variables are required, but you can supply a different configuration via Spring Boot’s standard options (`LOGGING_CONFIG`, `logging.config`, or by overriding `logback-spring.xml` on the classpath).
-- Container runtimes should forward `stdout`/`stderr` to your logging pipeline. Avoid redirecting logs to files unless your platform explicitly demands it.
+The backend writes structured JSON events to `stdout` via `src/main/resources/logback-spring.xml`. Every record contains timestamp, app, environment, instance, logger, thread, message arguments, MDC, and stack traces so Promtail/Loki (or any log shipper) can parse them without extra processing.
 
-## Image Upload Checks
+Container runtimes should forward `stdout`/`stderr` to your logging pipeline. Avoid redirecting logs to files unless your platform explicitly demands it.
 
-### Local (dev profile, H2 + temp storage)
+## Image upload
 
-1. Start backend: `make run` (uses in-memory H2 and local filesystem storage under `/tmp/bulletin-images`).
-2. Start frontend dev server: `cd frontend && npm install && npm run dev`.
-3. In React Admin:
-    - Create a bulletin or edit an existing one.
-    - Use the “Upload image” field; after save, the image preview should load via the generated `imageUrl`.
-4. Verify backend log: look for `Stored image` entries or check `/tmp/bulletin-images` for a new file. Refresh the bulletin show page to ensure the presigned/local URL still renders.
+### Local checks
+
+Dev profile:
+* Backend uses in-memory H2
+* Image storage uses the local filesystem under `/tmp/bulletin-images`
+
+Steps:
+1. Start the backend: `make run`
+2. Start the frontend dev server: `cd frontend && npm install && npm run dev`
+3. In React Admin, create or edit a bulletin and upload an image
+4. Verify that the preview loads via the generated `imageUrl`
+5. Check backend logs or `/tmp/bulletin-images` for the uploaded file
 
 ### Production / S3
 
-1. Ensure the S3-related variables from the table above (bucket, region, access/secret keys, optional endpoint/CDN URL) are exported alongside the `prod` profile settings.
-2. Deploy backend (e.g., `java -jar build/libs/project-devops-deploy-0.0.1-SNAPSHOT.jar`).
-3. In the frontend (local or deployed), upload an image for a bulletin.
-4. Confirm expected behavior:
-    - Response from `/api/files/upload` contains a non-empty `key`.
-    - Image shows up in bulletin show view (URL should either point to CDN or be a presigned S3 link).
-    - Object exists in S3 bucket (check via AWS console or `aws s3 ls s3://your-bucket/bulletins/...`).
-5. Optional: run `curl -I "$(curl -s .../api/files/view?key=... | jq -r .url)"` to ensure the presigned URL is valid from the production environment.
+In production:
+1. Configure the S3-related environment variables from the table above
+2. Deploy the backend
+3. Upload an image for a bulletin
+4. Verify that the response from `/api/files/upload` contains a non-empty key
+5. Verify that the image is shown in the bulletin view
+6. Verify that the object exists in the S3 bucket
+
+### S3 bucket setup
+
+The application stores uploaded bulletin images in S3-compatible object storage.
+
+If you do not automate bucket creation with IaC, create it manually in Yandex Cloud Console:
+1. Open Object Storage in Yandex Cloud.
+2. Create a bucket with a unique name.
+3. Choose the region that matches your deployment.
+4. Create an access key / secret key pair for the service account.
+5. Export the required environment variables for the prod profile:
+    - STORAGE_S3_BUCKET
+    - STORAGE_S3_REGION
+    - STORAGE_S3_ENDPOINT if you use a custom S3 endpoint
+    - STORAGE_S3_ACCESSKEY
+    - STORAGE_S3_SECRETKEY
+    - STORAGE_S3_CDNURL if you serve files through CDN
+7. Verify file upload in the application UI and make sure the uploaded object appears in the bucket.
