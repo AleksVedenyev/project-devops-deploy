@@ -3,3 +3,4 @@ collections:
 
 roles:
   - name: geerlingguy.docker
+  - name: geerlingguy.nginx

@@ -2,7 +2,20 @@
   become: true
   roles:
     - role: geerlingguy.docker
+    - role: geerlingguy.nginx
+      vars:
+        nginx_proxy_cache_path: "/var/cache/nginx keys_zone=my_cache:10m inactive=60m max_size=1g;"
+
   tasks:
+    - name: Copy nginx conf file to remote host
+      ansible.builtin.copy:
+        src: files/nginx.conf   
+        dest: /etc/nginx/conf.d/my_domain.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Nginx reload
+
     - name: Add user to docker group
       ansible.builtin.user:
         name: "{{ docker_user }}"
@@ -29,13 +42,13 @@
         port: '443'
         proto: tcp
 
-    - name: UFW allow 8080
-      community.general.ufw:
-        rule: allow
-        port: '8080'
-        proto: tcp
-
     - name: Deny everything and enable UFW
       community.general.ufw:
         policy: deny
         state: enabled
+    
+  handlers:
+    - name: Nginx reload
+      service:
+        name: nginx
+        state: reloaded
