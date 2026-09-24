@@ -4,12 +4,17 @@
     - role: geerlingguy.docker
     - role: geerlingguy.nginx
       vars:
-        nginx_proxy_cache_path: "/var/cache/nginx keys_zone=my_cache:10m inactive=60m max_size=1g;"
+        nginx_proxy_cache_path: "/var/cache/nginx keys_zone=my_cache:10m inactive=60m max_size=1g"
 
   tasks:
+    - name: Remove default Nginx vhost
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
     - name: Copy nginx conf file to remote host
       ansible.builtin.copy:
-        src: files/nginx.conf   
+        src: files/my_domain.conf   
         dest: /etc/nginx/conf.d/my_domain.conf
         owner: root
         group: root
