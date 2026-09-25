@@ -6,6 +6,9 @@ docker-build:
 docker-run-dev:
 	docker run --rm -p 8080:8080 project-devops-deploy:latest
 
+requirements:
+	ansible-galaxy install -r requirements.yml
+
 deploy:
 	ansible-playbook --vault-password-file ./vault-password-file deploy.yml -i inventory.yml -e "image_tag=$(IMAGE_TAG)"
 
