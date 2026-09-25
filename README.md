@@ -56,6 +56,17 @@ chmod 600 vault-password-file
 ```
 The file is ignored by git and is not committed to the repository. If you want to use a different path, update the --vault-password-file argument in Makefile.
 
+### Ansible dependencies
+
+Third-party roles and collections are listed in `requirements.yml`.
+
+To install them locally, run:
+
+```bash
+make requirements
+```
+This command installs all required Ansible roles and collections via ansible-galaxy install -r requirements.yml.
+
 ## Environment variables
 
 Key variables are read directly by Spring Boot (see `src/main/resources/application.yml` and `application-prod.yml` for defaults):
