@@ -1,4 +1,4 @@
-docker_user: "deploy"
+user: "deploy"
 image_repository: "aleksved/project-devops-deploy"
 image_tag: "latest" 
 image_name: "{{ image_repository }}:{{ image_tag }}" 
