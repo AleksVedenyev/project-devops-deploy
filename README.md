@@ -44,6 +44,16 @@ make deploy IMAGE_TAG=<git-commit-sha>
 
 Each CI run on `main` publishes the image under two tags: `latest` and the commit SHA (`aleksved/project-devops-deploy:<sha>`). The SHA tag is never overwritten, so it can be used to redeploy an exact previous build if a rollback is needed.
 
+### Vault password file
+
+Ansible uses an encrypted `vault.yml` for sensitive variables. To run deployment locally, create a password file in the project root:
+
+```bash
+echo "your-secret-password" > vault-password-file
+chmod 600 vault-password-file
+```
+The file is ignored by git and is not committed to the repository. If you want to use a different path, update the --vault-password-file argument in Makefile.
+
 ## Environment variables
 
 Key variables are read directly by Spring Boot (see `src/main/resources/application.yml` and `application-prod.yml` for defaults):
