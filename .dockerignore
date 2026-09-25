@@ -4,3 +4,4 @@ build/
 frontend/node_modules/
 frontend/dist/
 .gradle/
+vault-password-file
